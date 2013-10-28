@@ -1,0 +1,4 @@
+animation
+=========
+
+computer animation class
