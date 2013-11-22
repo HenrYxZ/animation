@@ -1,14 +1,8 @@
 import cv2
 import numpy as np
 
-# inicio el stream de video
-cap = cv2.VideoCapture(0)
 
-while(1):
-
-    # leo los frames
-    _,frame = cap.read()
-
+def find_points(frame, number):
     # los suavizo
     frame = cv2.blur(frame,(3,3))
 
@@ -16,6 +10,7 @@ while(1):
     hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
     t = cv2.inRange(hsv,np.array((0, 150, 0)), np.array((5, 255, 255)))
     t2 = t.copy()
+    points = []
 
     # encuentro los contornos
     contours,hierarchy = cv2.findContours(t,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
@@ -33,12 +28,29 @@ while(1):
         if(M['m00']!=0):
             cx,cy = int(M['m10']/M['m00']), int(M['m01']/M['m00'])
             cv2.circle(frame,(cx,cy),5,255,-1)
-
-  
+            # OJO : quizas sea necesario pasarlo a float
+            points.append(np.array((cx, cy)))
 
     # Lo muestro
-    cv2.imshow('frame',frame)
+    frame_name = 'frame ' + number 
+    cv2.imshow(frame_name,frame)
     cv2.imshow('Color',t2)
+    return points
+
+# inicio el stream de video
+cap = cv2.VideoCapture(0)
+
+while(1):
+
+    # leo los frames
+    _,frame = cap.read()
+    if not _:
+        print "NO hay imagen"
+        break
+
+    find_points(frame)
+    
+
     if cv2.waitKey(33)== 27:
         break
 
