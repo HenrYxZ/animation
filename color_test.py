@@ -2,13 +2,13 @@ import cv2
 import numpy as np
 
 
-def find_points(frame, number):
+def find_points(frame):
     # los suavizo
     frame = cv2.blur(frame,(3,3))
 
     # convierto a  hsv y especifico el rango de color
     hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
-    t = cv2.inRange(hsv,np.array((0, 150, 0)), np.array((5, 255, 255)))
+    t = cv2.inRange(hsv,np.array((104, 178, 70)), np.array((130, 240, 124)))
     t2 = t.copy()
     points = []
 
@@ -32,14 +32,14 @@ def find_points(frame, number):
             points.append(np.array((cx, cy)))
 
     # Lo muestro
-    frame_name = 'frame ' + number 
+    frame_name = 'frame '
     cv2.imshow(frame_name,frame)
     cv2.imshow('Color',t2)
     return points
 
 # inicio el stream de video
 cap = cv2.VideoCapture(0)
-
+counter = 1
 while(1):
 
     # leo los frames
@@ -49,7 +49,7 @@ while(1):
         break
 
     find_points(frame)
-    
+    counter += 1
 
     if cv2.waitKey(33)== 27:
         break

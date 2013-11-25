@@ -81,5 +81,16 @@ def process_videos(cap_1, cap_2):
 			s = s_x + s_y + s_z
 			log.write(s)
 
-# Cerrar todo
-cv2.destroyAllWindows()
+# --------------------- El main ----------------------
+if __name__ == "__main__":
+
+	print ("Path for first camera video\n")
+	source_1 = raw_input()
+	print ("Path for second camera video\n")
+	source_2 = raw_input()
+
+	cap_1, cap_2 = get_videos(source_1, source_2)
+	process_videos(cap_1, cap_2)
+	# Cerrar todo
+	cv2.destroyAllWindows()
+
