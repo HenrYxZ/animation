@@ -8,7 +8,11 @@ def find_points(frame):
 
     # convierto a  hsv y especifico el rango de color
     hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
-    t = cv2.inRange(hsv,np.array((104, 178, 70)), np.array((130, 240, 124)))
+    # azul
+    # np.array((104, 178, 70)), np.array((130, 240, 124))
+    # blanco np.array((0, 0, 166)), np.array((180, 53, 255))
+    # rojo 
+    t = cv2.inRange(hsv,np.array((160, 128, 104)), np.array((179, 255, 255)))
     t2 = t.copy()
     points = []
 
@@ -20,7 +24,7 @@ def find_points(frame):
     best_cnt=0
     for cnt in contours:
         area = cv2.contourArea(cnt)
-        if area > max_area:
+        if area > 10:
             max_area = area
             best_cnt = cnt
           # encuentro los centroides best_cnt y hago un circulo
