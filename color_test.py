@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 
-def find_points(frame):
+def find_points(frame, num):
     # los suavizo
     frame = cv2.blur(frame,(3,3))
 
@@ -24,7 +24,7 @@ def find_points(frame):
     best_cnt=0
     for cnt in contours:
         area = cv2.contourArea(cnt)
-        if area > 40:
+        if area > 60:
             max_area = area
             best_cnt = cnt
           # encuentro los centroides best_cnt y hago un circulo
@@ -33,14 +33,16 @@ def find_points(frame):
             cx,cy = int(M['m10']/M['m00']), int(M['m01']/M['m00'])
             cv2.circle(frame,(cx,cy),5,255,-1)
             # OJO : quizas sea necesario pasarlo a float
-            points.append(np.array((cx, cy)))
+            x, y = float(cx), float(cy)
+            points.append((x, y))
 
     # Lo muestro
-    frame_name = 'frame '
-    cv2.imshow(frame_name,frame)
-    cv2.imshow('Color',t2)
+    frame_name = 'frame ' + str(num)
+    cv2.imshow(frame_name, frame)
+    color_name = 'Color ' + str(num) 
+    cv2.imshow(color_name, t2)
     return points
-
+'''
 # inicio el stream de video
 cap = cv2.VideoCapture(0)
 counter = 1
@@ -61,3 +63,4 @@ while(1):
 # limpio antes de irme
 cv2.destroyAllWindows()
 cap.release()
+'''
