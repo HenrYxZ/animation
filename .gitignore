@@ -1,5 +1,10 @@
 *.py[cod]
 
+imgs
+log.txt
+log_1.txt
+log_2.txt
+
 # C extensions
 *.so
 
