@@ -22,6 +22,37 @@ global points
 
 # Obtener las matrices de calibracion de las dos camaras
 
+focal_lenght_1 = [ 1169.714437664702900, 1171.172019048536200 ]
+principal_point_1 = [ 667.264086590390550, 360.838874317338880 ]
+
+first_camera_matrix = np.matrix([[focal_lenght_1[0], 0., principal_point_1[0]],
+ [0, focal_lenght_1[1], principal_point_1[1]], [0., 0., 1.]])
+
+focal_lenght_2 = [ 1143.746397921609100, 1150.900867474856800 ]
+principal_point_2 = [ 644.388054840155970, 289.264135801620970 ]
+
+second_camera_matrix = np.matrix([[focal_lenght_2[0], 0., principal_point_2[0]],
+ [0, focal_lenght_2[1], principal_point_2[1]], [0., 0., 1.]])
+
+# Rotation and Translation matrices
+# Matriz fundamental para pasar de la camara uno a la dos (se supone ausencia
+#	de rotaciones)
+# Distancia entre camaras medida con regla (cms)
+translation_x = -19.1
+translation_y = 5.8
+translation_z = 4.4
+RT = np.matrix([[1., 0., 0., translation_x], 
+				[0., 1., 0., translation_y],
+				[0., 0., 1., translation_z]])
+
+
+# Matrices de Proyeccion
+# La matriz de proyeccion es multiplicada por la identidad porque se supone en
+# el origen del sistema de coordenadas 3D
+first_projection_matrix = first_camera_matrix
+second_projection_matrix = second_camera_matrix * RT
+
+
 # Obtener dos videos
 def get_videos(source_1, source_2):
 	first_cap = cv2.VideoCapture(source_1)

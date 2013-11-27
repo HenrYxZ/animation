@@ -24,7 +24,7 @@ def find_points(frame):
     best_cnt=0
     for cnt in contours:
         area = cv2.contourArea(cnt)
-        if area > 10:
+        if area > 40:
             max_area = area
             best_cnt = cnt
           # encuentro los centroides best_cnt y hago un circulo
