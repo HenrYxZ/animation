@@ -250,11 +250,11 @@ def process_videos(cap_1, cap_2, P1, P2, first_points_1, first_points_2):
 if __name__ == "__main__":
 
 	print ("Path for first camera video\n")
-	source_1 = raw_input()source_1 =
-	# source_1 = "../../tres_webcam.mp4"
+	# source_1 = raw_input()
+	source_1 = "../../facial_capture_videos/tres_webcam.mp4"
 	print ("Path for second camera video\n")
-	source_2 = raw_input()
-	# source_2 = "../../tres_cel.mp4"
+	# source_2 = raw_input()
+	source_2 = "../../facial_capture_videos/tres_cel.mp4"
 
 
 	# Matrices de Proyeccion
