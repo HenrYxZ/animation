@@ -1,16 +1,37 @@
 '''
 GUI for showing the 3D points with OpenGL
+
+Created on December 25 2013
+@author: Hernaldo Henriquez
 '''
 SCREEN_SIZE = (800, 600)
 
 from math import radians 
 from geom import Point3
+from geom import BoundingBox
+from geom import projection
+import sys
 
 from OpenGL.GL import *
 from OpenGL.GLU import *
+from OpenGL.GLUT import *
 
 previous_time = 0
 current_frame = 0
+
+beginning_x = 0
+beginning_y = 0
+
+zSensitivity = 1
+zoom = 0
+
+# float speed for the animation
+speed = 1
+
+# bounding box for the set of points
+minP = Point3(-100., -100., -100.)
+maxP = Point3(100., 100., 100.)
+bb = BoundingBox(minP, maxP)
 
 # window parameters
 window_width = 800
@@ -30,26 +51,9 @@ def setProjection():
 
     gluPerspective(60.0, window_aspect, 1, 1000)
 
-def drawAxis():
+def computeLookAt():
 
-    glLineWidth(2.0)
-    line_length = 100
     
-    glBegin(GL_LINES)
-
-    glColor3i(1, 0, 0)
-    glVertex3i(0, 0, 0)
-    glVertex3i(line_length, 0, 0)
-
-    glColor3i(0, 1, 0)
-    glVertex3i(0, 0, 0)
-    glVertex3i(0, line_length, 0)
-
-    glColor3i(0, 0, 1)
-    glVertex3i(0, 0, 0)
-    glVertex3i(0, 0, line_length)
-
-    glEnd()
 
 def resize(width, height):
     
@@ -82,7 +86,7 @@ def drawPoint(point):
 def display():
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-
+    # draw all the points in the current frame
     setProjection()
 
 def idle():
@@ -103,6 +107,57 @@ def idle():
             previous_time = actual_time
 
         glutPostRedisplay()
+
+def drawBounds():
+
+    axis = ['xy', 'xz', 'yz']
+
+    for p in axis:
+        notp = [axis[i] for i in range(len(axis)) if axis[i]!= p]
+        u = projection(bb.getMax(), bb.getMin(), notp.pop())
+        v = projection(bb.getMax(), bb.getMin(), notp.pop())
+        drawRect(u, v, bb.getMin())
+
+    for p in axis:
+        notp = [axis[i] for i in range(len(axis)) if axis[i]!= p]
+        u = projection(bb.getMin(), bb.getMax(), notp.pop())
+        v = projection(bb.getMin(), bb.getMax(), notp.pop())
+        drawRect(u, v, bb.getMax())
+
+def mouse(button, state, x, y):
+
+    # right button
+    if button == 2:
+        if state == GLUT_DOWN:
+            beginning_x = x
+            beginning_y = y
+            right_button_down = True
+        else:
+            right_button_down = False
+
+    # scroll up
+    if button == 3:
+        if state == GLUT_DOWN:
+
+
+def keyboard(key):
+
+    if key == 'f':
+        # animation 20% faster
+        speed *= 1.2
+    
+    elif key == 's':
+        # animation 20% slower
+        speed *= 0.8
+    
+    elif key == ' ':
+        play = false if play else play = true
+
+    elif key == 'b':
+        drawBounds()
+
+    elif key == 27:
+        sys.exit(0)
 
 def main():
 
