@@ -38,18 +38,18 @@ def makeBB(vectors):
 
 	for v in vectors:
 		if (v.x > max_x):
-			max_x = x
+			max_x = v.x
 		if (v.y > max_y):
-			max_y = y
+			max_y = v.y
 		if (v.z > max_z):
-			max_z = z
+			max_z = v.z
 
 		if (v.x < min_x):
-			min_x = x
+			min_x = v.x
 		if (v.y < min_y):
-			min_y = y
+			min_y = v.y
 		if (v.z < min_z):
-			min_z = z
+			min_z = v.z
 
 	max_v = Vector3(max_x, max_y, max_z)
 	min_v = Vector3(min_x, min_y, min_z)
@@ -80,6 +80,14 @@ def scalarProd(p1,p2, scalar):
 	answer.x = (p1.x - p2.x) * scalar
 	answer.y = (p1.y - p2.y) * scalar
 	answer.z = (p1.z - p2.z) * scalar
+	return answer
+
+def single_scalar_prod(p1, scalar):
+
+	answer = Vector3()
+	answer.x = p1.x * scalar
+	answer.y = p1.y * scalar
+	answer.z = p1.z * scalar
 	return answer
 
 def projection(p1, p2, dimension):

@@ -6,9 +6,7 @@ Created on December 25 2013
 '''
 SCREEN_SIZE = (800, 600)
 
-from geom import Vector3
-from geom import BoundingBox
-from geom import projection
+import geom as gm
 from drawing_helper import drawAxis
 from drawing_helper import drawRect
 from parser import parse
@@ -26,24 +24,24 @@ beginning_x = 0
 beginning_y = 0
 
 zSensitivity = 1
-zoom = 0
+zoom = 1
 
 # float speed for the animation
 speed = 1
 capture_frame_time = 1 / 30.
 
 # bounding box for the set of points
-minP = Vector3(-100., -100., -100.)
-maxP = Vector3(100., 100., 100.)
-bb = BoundingBox(minP, maxP)
+minP = gm.Vector3(-100., -100., -100.)
+maxP = gm.Vector3(100., 100., 100.)
+bb = gm.BoundingBox(minP, maxP)
 
 # window parameters
 window_width = 800
 window_height = 600
 window_aspect = window_width/float(window_height);
-eye = [-100., 100., 100]
-center = [0., 0., 0.]
-up = [0., 1., 0.]
+eye = gm.Vector3(-100., 100., 100)
+center = gm.Vector3(0., 0., 0.)
+up = gm.Vector3(0., 1., 0.)
 
 frames = []
 
@@ -58,7 +56,7 @@ NUMBER_OF_POINTS = 5
 
 def setProjection():
 
-    glMatrixMode(GL_MODELVIEW)
+    glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
 
     gluPerspective(60.0, window_aspect, 1, 1000)
@@ -73,14 +71,14 @@ def computeEyePosition():
     snt = math.sin(thetaR)
     snp = math.sin(phiR)
 
-    vx = -100
-    vy = 100
-    vz = 100
+    vx = -10
+    vy = 10
+    vz = 50
 
-    zx = vx / math.sqrt(vx**2 + vz**2)
+    xd = vx / math.sqrt(vx**2 + vz**2)
     zd = vz / math.sqrt(vx**2 + vz**2)
 
-    rotv = Vector3(
+    rotv = gm.Vector3(
     vx*(cst*(zd*zd + xd*xd*csp) + snt*(-1*xd*zd + xd*zd*csp))
      + vy*(xd*cst*snp + zd*snt*snp)
      + vz*(cst*(-1*xd*zd + xd*zd*csp) + snt*(xd*xd + zd*zd*csp)),
@@ -96,16 +94,18 @@ def computeEyePosition():
 def computeLookAt():
 
     eyev = computeEyePosition()
-    eye = scalarProd(sumOfVectors(eyev, center), zoom)
+    eye = gm.single_scalar_prod(gm.sumOfVectors(eyev, center), zoom)
 
 def resize(width, height):
     
     glViewport(0, 0, width, height)
-    glMatrixMode(GL_PROJECTION)
-    glLoadIdentity()
-    gluPerspective(60.0, window_aspect, 1, 1000)
+
+    setProjection()
+
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
+
+    glutPostRedisplay()
 
 
 def init():
@@ -131,15 +131,34 @@ def drawFrame():
     for p in frames[current_frame].points:
         drawPoint(p)
 
+def set_lighting():
+
+    glShadeModel(GL_FLAT)
+    glDisable(GL_LIGHTING)
+    glDisable(GL_LIGHT0)
+    glDisable(GL_COLOR_MATERIAL)
+
+def set_draw_mode():
+
+    glPolygonMode(GL_FRONT, GL_FILL)
+    glPolygonMode(GL_BACK, GL_FILL)
+
 def display():
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     # draw all the points in the current frame
     setProjection()
 
-    gluLookAt(eye[0],      eye[1],     eye[2],
-           center[0],   center[1],  center[2],
-               up[0],       up[1],      up[2])
+    glMatrixMode(GL_MODELVIEW)
+    glLoadIdentity()
+
+    set_lighting()
+
+    gluLookAt(eye.x,      eye.y,     eye.z,
+           center.x,   center.y,  center.z,
+               up.x,       up.y,      up.z)
+
+    set_draw_mode()
 
     if (showAxis):
         drawAxis()
@@ -154,7 +173,7 @@ def display():
 def updateBounds():
 
     global bb
-    bb = makeBB(frames[current_frame].points)
+    bb = gm.makeBB(frames[current_frame].points)
 
 
 def idle():
@@ -172,7 +191,7 @@ def idle():
         if (frames_passed > 0):
             next_frame = current_frame + frames_passed
             
-            if (next_frame > len(frames)):
+            if (next_frame >= len(frames)):
                 next_frame = 0
 
             current_frame = next_frame
@@ -186,17 +205,20 @@ def drawBounds():
 
     for p in axis:
         notp = [axis[i] for i in range(len(axis)) if axis[i]!= p]
-        u = projection(bb.maxPoint, bb.minPoint, notp.pop())
-        v = projection(bb.maxPoint, bb.minPoint, notp.pop())
+        u = gm.projection(bb.maxPoint, bb.minPoint, notp.pop())
+        v = gm.projection(bb.maxPoint, bb.minPoint, notp.pop())
         drawRect(u, v, bb.minPoint)
 
     for p in axis:
         notp = [axis[i] for i in range(len(axis)) if axis[i]!= p]
-        u = projection(bb.minPoint, bb.maxPoint, notp.pop())
-        v = projection(bb.minPoint, bb.maxPoint, notp.pop())
+        u = gm.projection(bb.minPoint, bb.maxPoint, notp.pop())
+        v = gm.projection(bb.minPoint, bb.maxPoint, notp.pop())
         drawRect(u, v, bb.maxPoint)
 
 def mouse(button, state, x, y):
+
+    global zoom
+    global right_button_down
 
     # right button
     if button == 2:
@@ -221,6 +243,11 @@ def mouse(button, state, x, y):
 
 def mouse_motion(x, y):
 
+    global theta
+    global phi
+    global beginning_x
+    global beginning_y
+
     if(right_button_down):
         theta += (beginning_x - float(x)) / 2.0
         phi += (beginning_y - float(y)) / 2.0
@@ -234,7 +261,12 @@ def mouse_motion(x, y):
         glutPostRedisplay()
 
 
-def keyboard(key):
+def keyboard(key, x, y):
+
+    global speed
+    global play
+    global showBounds
+    global showAxis
 
     if key == 'f':
         # animation 20% faster
