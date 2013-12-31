@@ -26,6 +26,8 @@ beginning_y = 0
 zSensitivity = 1
 zoom = 1
 
+right_button_down = False
+
 # float speed for the animation
 speed = 1
 capture_frame_time = 1 / 30.
@@ -73,7 +75,7 @@ def computeEyePosition():
 
     vx = -10
     vy = 10
-    vz = 50
+    vz = 10
 
     xd = vx / math.sqrt(vx**2 + vz**2)
     zd = vz / math.sqrt(vx**2 + vz**2)
