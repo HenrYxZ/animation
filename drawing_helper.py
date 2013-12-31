@@ -7,8 +7,8 @@ Created on December 25 2013
 '''
 
 from OpenGL.GL import *
-from geom import Point3
-from geom import sumOfPoints
+from geom import Vector3
+from geom import sumOfVectors
 
 def drawRect(u, v, p):
 
@@ -16,13 +16,13 @@ def drawRect(u, v, p):
 	glColor3i(0, 0, 1)
 	glVertex3f(p.x, p.y, p.z)
 
-	pu = sumOfPoints(p, u)
+	pu = sumOfVectors(p, u)
 	glVertex3f(pu.x, pu.y, pu.z)
 
-	puv = sumOfPoints(pu, v)
+	puv = sumOfVectors(pu, v)
 	glVertex3f(puv.x, puv.y, puv.z)
 
-	pv = sumOfPoints(p, v)
+	pv = sumOfVectors(p, v)
 	glVertex3f(pv.x, pv.y, pv.z)
 
 	glVertex3f(p.x, p.y, p.z)

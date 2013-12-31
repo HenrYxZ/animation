@@ -6,9 +6,9 @@ Created on December 25 2013
 '''
 
 class Frame:
-	def __init__(self, number, points = None):
+	def __init__(self, number):
 		self._number = number
-		self._points = points
+		self._points = []
 
 	@property
 	def number(self):

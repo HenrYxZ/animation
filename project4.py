@@ -84,9 +84,9 @@ def point2d_to_str(point):
 	return s
 
 def point3d_to_str(point):
-	s_x = "x = " + str(point[0])
-	s_y = " y = " + str(point[1])
-	s_z = " z = " + str(point[2]) + "\n"
+	s_x = str(point[0]) + ", "
+	s_y = str(point[1]) + ", "
+	s_z = str(point[2]) + ",\n"
 	s = s_x + s_y + s_z
 	return s
 
@@ -163,7 +163,7 @@ def process_videos(cap_1, cap_2, P1, P2, first_points_1, first_points_2):
 
 		# Escribir estos puntos 2D encontrados
 
-		header = "New frame number " + str(counter) + ": \n"
+		header = "New frame number :" + str(counter) + "\n"
 		log_1.write(header)
 		log_2.write(header)
 
@@ -231,7 +231,7 @@ def process_videos(cap_1, cap_2, P1, P2, first_points_1, first_points_2):
 			print mat_points
 
 			# Escribir esto a un archivo
-			header = "New frame number " + str(counter) + ": \n"
+			header = "New frame number :" + str(counter) + "\n"
 			log.write(header)
 
 			for point in mat_points:

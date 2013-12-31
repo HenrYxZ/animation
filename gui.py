@@ -6,11 +6,14 @@ Created on December 25 2013
 '''
 SCREEN_SIZE = (800, 600)
 
-from math import radians 
-from geom import Point3
+from geom import Vector3
 from geom import BoundingBox
 from geom import projection
+from drawing_helper import drawAxis
+from drawing_helper import drawRect
+from parser import parse
 import sys
+import math
 
 from OpenGL.GL import *
 from OpenGL.GLU import *
@@ -27,22 +30,31 @@ zoom = 0
 
 # float speed for the animation
 speed = 1
+capture_frame_time = 1 / 30.
 
 # bounding box for the set of points
-minP = Point3(-100., -100., -100.)
-maxP = Point3(100., 100., 100.)
+minP = Vector3(-100., -100., -100.)
+maxP = Vector3(100., 100., 100.)
 bb = BoundingBox(minP, maxP)
 
 # window parameters
 window_width = 800
 window_height = 600
 window_aspect = window_width/float(window_height);
-eye = []
+eye = [-100., 100., 100]
 center = [0., 0., 0.]
 up = [0., 1., 0.]
 
+frames = []
+
 theta = 0.
 phi = 0.
+play = True
+
+showAxis = True
+showBounds = True
+
+NUMBER_OF_POINTS = 5
 
 def setProjection():
 
@@ -51,9 +63,40 @@ def setProjection():
 
     gluPerspective(60.0, window_aspect, 1, 1000)
 
+def computeEyePosition():
+
+    thetaR = math.radians(theta)
+    phiR = math.radians(phi)
+
+    cst = math.cos(thetaR)
+    csp = math.cos(phiR)
+    snt = math.sin(thetaR)
+    snp = math.sin(phiR)
+
+    vx = -100
+    vy = 100
+    vz = 100
+
+    zx = vx / math.sqrt(vx**2 + vz**2)
+    zd = vz / math.sqrt(vx**2 + vz**2)
+
+    rotv = Vector3(
+    vx*(cst*(zd*zd + xd*xd*csp) + snt*(-1*xd*zd + xd*zd*csp))
+     + vy*(xd*cst*snp + zd*snt*snp)
+     + vz*(cst*(-1*xd*zd + xd*zd*csp) + snt*(xd*xd + zd*zd*csp)),
+                      vx*(-1*xd*snp) + vy*(csp) + vz*(-1*zd*snp),
+     vx*(cst*(-1*xd*zd + xd*zd*csp) - snt*(zd*zd + xd*xd*csp))
+     + vy*(-1*xd*snt*snp + zd*cst*snp)
+     + vz*(cst*(xd*xd + zd*zd*csp)
+       - snt*(-1*xd*zd + xd*zd*csp)))
+
+    return rotv
+
+
 def computeLookAt():
 
-    
+    eyev = computeEyePosition()
+    eye = scalarProd(sumOfVectors(eyev, center), zoom)
 
 def resize(width, height):
     
@@ -73,8 +116,8 @@ def init():
     glClearColor(1.0, 1.0, 1.0, 0.0)
 
     glDisable(GL_LIGHTING)
-  	glDisable(GL_LIGHT0)
-  	glDisable(GL_COLOR_MATERIAL)
+    glDisable(GL_LIGHT0)
+    glDisable(GL_COLOR_MATERIAL)
 
 def drawPoint(point):
 
@@ -83,15 +126,44 @@ def drawPoint(point):
     glutSolidSphere(0.5, 80, 80)
     glPopMatrix()
 
+def drawFrame():
+
+    for p in frames[current_frame].points:
+        drawPoint(p)
+
 def display():
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     # draw all the points in the current frame
     setProjection()
 
+    gluLookAt(eye[0],      eye[1],     eye[2],
+           center[0],   center[1],  center[2],
+               up[0],       up[1],      up[2])
+
+    if (showAxis):
+        drawAxis()
+    if (showBounds):
+        drawBounds()
+
+    drawFrame()
+
+    glFlush()
+    glutSwapBuffers()
+
+def updateBounds():
+
+    global bb
+    bb = makeBB(frames[current_frame].points)
+
+
 def idle():
 
-    if (play == true):
+    global previous_time
+    global current_frame
+    global frames
+
+    if (play == True):
         actual_time = glutGet(GLUT_ELAPSED_TIME)
         # number of milliseconds between two consecutive frames
         frame_time = int(capture_frame_time * 1000 * speed)
@@ -100,12 +172,12 @@ def idle():
         if (frames_passed > 0):
             next_frame = current_frame + frames_passed
             
-            if (next_frame > number_of_frames):
+            if (next_frame > len(frames)):
                 next_frame = 0
 
             current_frame = next_frame
             previous_time = actual_time
-
+            updateBounds()
         glutPostRedisplay()
 
 def drawBounds():
@@ -114,15 +186,15 @@ def drawBounds():
 
     for p in axis:
         notp = [axis[i] for i in range(len(axis)) if axis[i]!= p]
-        u = projection(bb.getMax(), bb.getMin(), notp.pop())
-        v = projection(bb.getMax(), bb.getMin(), notp.pop())
-        drawRect(u, v, bb.getMin())
+        u = projection(bb.maxPoint, bb.minPoint, notp.pop())
+        v = projection(bb.maxPoint, bb.minPoint, notp.pop())
+        drawRect(u, v, bb.minPoint)
 
     for p in axis:
         notp = [axis[i] for i in range(len(axis)) if axis[i]!= p]
-        u = projection(bb.getMin(), bb.getMax(), notp.pop())
-        v = projection(bb.getMin(), bb.getMax(), notp.pop())
-        drawRect(u, v, bb.getMax())
+        u = projection(bb.minPoint, bb.maxPoint, notp.pop())
+        v = projection(bb.minPoint, bb.maxPoint, notp.pop())
+        drawRect(u, v, bb.maxPoint)
 
 def mouse(button, state, x, y):
 
@@ -138,6 +210,28 @@ def mouse(button, state, x, y):
     # scroll up
     if button == 3:
         if state == GLUT_DOWN:
+            zoom -= zSensitivity * 50
+            computeLookAt()
+
+    # scroll down
+    if button == 4:
+        if state == GLUT_DOWN:
+            zoom += zSensitivity * 50
+            computeLookAt()
+
+def mouse_motion(x, y):
+
+    if(right_button_down):
+        theta += (beginning_x - float(x)) / 2.0
+        phi += (beginning_y - float(y)) / 2.0
+        beginning_x = x
+        beginning_y = y
+        if (phi < -45):
+            phi = -45
+        if (phi > 45):
+            phi = 45
+        computeLookAt()
+        glutPostRedisplay()
 
 
 def keyboard(key):
@@ -151,27 +245,41 @@ def keyboard(key):
         speed *= 0.8
     
     elif key == ' ':
-        play = false if play else play = true
+        if play:
+            play = False
+        else:
+            play = True
 
     elif key == 'b':
-        drawBounds()
+        showBounds != showBounds
+
+    elif key == 'a':
+        showAxis != showAxis
 
     elif key == 27:
         sys.exit(0)
 
 def main():
 
+    global frames
+    frames = parse("log.txt", NUMBER_OF_POINTS)
+
     # Initialize GLUT
+    glutInit()
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH)
     glutInitWindowSize(window_width, window_height)
-    glutWindowPosition(100, 100)
+    glutInitWindowPosition(100, 100)
     glutCreateWindow("3D Reconstruction")
     glutDisplayFunc(display)
     glutReshapeFunc(resize)
     glutKeyboardFunc(keyboard)
     glutIdleFunc(idle)
     glutMouseFunc(mouse)
-    glutMotionFunc(mouseMotion)
+    glutMotionFunc(mouse_motion)
+
+    init()
+
+    glutMainLoop()
 
 if __name__ == '__main__':
     main()

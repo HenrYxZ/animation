@@ -1,4 +1,4 @@
-class Point3:
+class Vector3:
 
 	def __init__(self, x=0., y=0., z=0.):
 		self._x = x
@@ -26,19 +26,49 @@ class Point3:
 	def z(self, value):
 	    self._z = value
 	
-	
+def makeBB(vectors):
 
-def sumOfPoints(p1, p2):
+	max_x = 0
+	max_y = 0
+	max_z = 0
 
-	answer = Point3()
+	min_x = 0
+	min_y = 0
+	min_z = 0
+
+	for v in vectors:
+		if (v.x > max_x):
+			max_x = x
+		if (v.y > max_y):
+			max_y = y
+		if (v.z > max_z):
+			max_z = z
+
+		if (v.x < min_x):
+			min_x = x
+		if (v.y < min_y):
+			min_y = y
+		if (v.z < min_z):
+			min_z = z
+
+	max_v = Vector3(max_x, max_y, max_z)
+	min_v = Vector3(min_x, min_y, min_z)
+
+	bb = BoundingBox(min_v, max_v)
+
+	return bb
+
+def sumOfVectors(p1, p2):
+
+	answer = Vector3()
 	answer.x = p1.x + p2.x
 	answer.y = p1.y + p2.y
 	answer.z = p1.z + p2.z
 	return answer
 
-def subOfPoints(p1, p2):
+def subOfVectors(p1, p2):
 
-	answer = Point3()
+	answer = Vector3()
 	answer.x = p1.x - p2.x
 	answer.y = p1.y - p2.y
 	answer.z = p1.z - p2.z
@@ -46,7 +76,7 @@ def subOfPoints(p1, p2):
 
 def scalarProd(p1,p2, scalar):
 
-	answer = Point3()
+	answer = Vector3()
 	answer.x = (p1.x - p2.x) * scalar
 	answer.y = (p1.y - p2.y) * scalar
 	answer.z = (p1.z - p2.z) * scalar
@@ -54,34 +84,39 @@ def scalarProd(p1,p2, scalar):
 
 def projection(p1, p2, dimension):
 	# The projection in one dimension for the vector made by p1 - p2
+	answer = Vector3(0., 0., 0.)
 	if dimension == 'x':
-		answer = Point3(0., p1.y - p2.y, p1.z - p2.z)
+		answer = Vector3(0., p1.y - p2.y, p1.z - p2.z)
 	elif dimension == 'y':
-		answer = Point3(p1.x - p2.x, 0., p1.z - p2.z)
+		answer = Vector3(p1.x - p2.x, 0., p1.z - p2.z)
 	elif dimension == 'z':
-		answer = Point3(p1.x - p2.x, p1.y - p2.y, 0.)
+		answer = Vector3(p1.x - p2.x, p1.y - p2.y, 0.)
 	elif dimension == 'xy':
-		answer = Point3(0., 0., p1.z - p2.z)
+		answer = Vector3(0., 0., p1.z - p2.z)
 	elif dimension == 'xz':
-		answer = Point3(0., p1.y - p2.y, 0.)
+		answer = Vector3(0., p1.y - p2.y, 0.)
 	else:
-		answer = Point3(p1.x - p2.x, 0., 0.)
+		answer = Vector3(p1.x - p2.x, 0., 0.)
 	return answer
 
 class BoundingBox:
 
 	def __init__(self, minPoint, maxPoint):
-		self.minPoint = minPoint
-		self.maxPoint = maxPoint
+		self._minPoint = minPoint
+		self._maxPoint = maxPoint
 
-	def setMin(p):
-		self.minPoint = p
+	@property
+	def minPoint(self):
+	    return self._minPoint
+	@minPoint.setter
+	def minPoint(self, value):
+	    self._minPoint = value
 
-	def setMax(p):
-		self.maxPoint = p
-
-	def getMin():
-		self.minPoint
-
-	def getMax():
-		self.maxPoint
+	@property
+	def maxPoint(self):
+	    return self._maxPoint
+	@maxPoint.setter
+	def maxPoint(self, value):
+	    self._maxPoint = value
+	
+	
