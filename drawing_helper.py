@@ -13,7 +13,7 @@ from geom import sumOfVectors
 def drawRect(u, v, p):
 
 	glBegin(GL_LINE_STRIP)
-	glColor3i(0, 0, 1)
+	glColor3f(0, 0, 1)
 	glVertex3f(p.x, p.y, p.z)
 
 	pu = sumOfVectors(p, u)
@@ -36,15 +36,15 @@ def drawAxis():
     
     glBegin(GL_LINES)
 
-    glColor3i(1, 0, 0)
+    glColor3f(1, 0, 0)
     glVertex3i(0, 0, 0)
     glVertex3i(line_length, 0, 0)
 
-    glColor3i(0, 1, 0)
+    glColor3f(0, 1, 0)
     glVertex3i(0, 0, 0)
     glVertex3i(0, line_length, 0)
 
-    glColor3i(0, 0, 1)
+    glColor3f(0, 0, 1)
     glVertex3i(0, 0, 0)
     glVertex3i(0, 0, line_length)
 

@@ -123,7 +123,7 @@ def drawPoint(point):
 
     glPushMatrix()
     glTranslatef(point.x, point.y, point.z)
-    glutSolidSphere(0.5, 80, 80)
+    glutSolidSphere(2, 80, 80)
     glPopMatrix()
 
 def drawFrame():
