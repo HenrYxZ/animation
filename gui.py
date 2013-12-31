@@ -41,7 +41,7 @@ bb = gm.BoundingBox(minP, maxP)
 window_width = 800
 window_height = 600
 window_aspect = window_width/float(window_height);
-eye = gm.Vector3(-100., 100., 100)
+eye = gm.Vector3(-10, 10., 300.)
 center = gm.Vector3(0., 0., 0.)
 up = gm.Vector3(0., 1., 0.)
 
@@ -73,9 +73,9 @@ def computeEyePosition():
     snt = math.sin(thetaR)
     snp = math.sin(phiR)
 
-    vx = -10
-    vy = 10
-    vz = 10
+    vx = -50
+    vy = 50
+    vz = 400
 
     xd = vx / math.sqrt(vx**2 + vz**2)
     zd = vz / math.sqrt(vx**2 + vz**2)
@@ -94,7 +94,7 @@ def computeEyePosition():
 
 
 def computeLookAt():
-
+    global eye
     eyev = computeEyePosition()
     eye = gm.single_scalar_prod(gm.sumOfVectors(eyev, center), zoom)
 
@@ -123,6 +123,7 @@ def init():
 
 def drawPoint(point):
 
+    glColor3f(0, 1, 0)
     glPushMatrix()
     glTranslatef(point.x, point.y, point.z)
     glutSolidSphere(2, 80, 80)
@@ -234,14 +235,16 @@ def mouse(button, state, x, y):
     # scroll up
     if button == 3:
         if state == GLUT_DOWN:
-            zoom -= zSensitivity * 50
+            zoom -= zSensitivity * 0.5
             computeLookAt()
+            glutPostRedisplay()
 
     # scroll down
     if button == 4:
         if state == GLUT_DOWN:
-            zoom += zSensitivity * 50
+            zoom += zSensitivity * 0.5
             computeLookAt()
+            glutPostRedisplay()
 
 def mouse_motion(x, y):
 
@@ -290,7 +293,7 @@ def keyboard(key, x, y):
     elif key == 'a':
         showAxis != showAxis
 
-    elif key == 27:
+    elif key == 27 or key == 'q':
         sys.exit(0)
 
 def main():
@@ -304,6 +307,7 @@ def main():
     glutInitWindowSize(window_width, window_height)
     glutInitWindowPosition(100, 100)
     glutCreateWindow("3D Reconstruction")
+
     glutDisplayFunc(display)
     glutReshapeFunc(resize)
     glutKeyboardFunc(keyboard)

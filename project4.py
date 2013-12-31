@@ -85,6 +85,9 @@ def point2d_to_str(point):
 
 def point3d_to_str(point):
 	s_x = str(point[0]) + ", "
+	# Esto se hace porque por alguna razon Y sale negativo
+	if point[1] < 0:
+		point[1] *= -1
 	s_y = str(point[1]) + ", "
 	s_z = str(point[2]) + ",\n"
 	s = s_x + s_y + s_z
