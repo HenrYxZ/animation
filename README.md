@@ -8,10 +8,10 @@ animation
 3. Write your extrinsic matrices in project4.py in "RT_1" and "RT_2". Look at http://docs.opencv.org/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html for more information about intrinsic and extrinsic matrices.
 4. Calibrate both cameras to get the principal point and the focal lenght of each one; you can calibrate cameras using this Matlab toolbox http://www.vision.caltech.edu/bouguetj/calib_doc/
 5. Run 
->>> python project4.py 
+`` python project4.py ``
 to process the two videos. The 3D positions of every points will be store in "log.txt". Also some testing images will be store in the imgs folder, so you can look if the points detection were effective or not.
 6. You can look a 3D animation of the points by running 
->>> python gui.py
+`` python gui.py ``
 
 ## Dependencies
 
